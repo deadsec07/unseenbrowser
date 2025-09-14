@@ -10,35 +10,85 @@ permissions:
 
 jobs:
   build:
+    name: Build ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Cache
+      - name: Cache electron caches
         uses: actions/cache@v4
         with:
           path: |
-            **/node_modules
             ~/.cache/electron
             ~/.cache/electron-builder
-          key: ${{ runner.os }}-node20-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-eb-cache
 
-      - name: Install deps (root + app/)
-        run: npm ci
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            app/node_modules
+          key: ${{ runner.os }}-node20-${{ hashFiles('package-lock.json', 'app/package-lock.json') }}
 
-      # If you want to auto-fetch Tor binaries here, do it per-OS and place under vendor/tor/<platform>/
-      # For Windows, you can download the "Tor Expert Bundle" zip and unzip into vendor/tor/win before build.
+      # Clean dist to avoid stale files
+      - name: Clean dist
+        if: runner.os != 'Windows'
+        run: rm -rf dist app/node_modules/.cache || true
 
-      - name: Build & publish
+      - name: Clean dist (Windows)
+        if: runner.os == 'Windows'
+        run: rmdir /s /q dist 2>nul || exit 0
+        shell: cmd
+
+      # Install deps explicitly (skip root postinstall to avoid double installs)
+      - name: Install root deps (no scripts)
+        run: npm ci --ignore-scripts
+
+      - name: Install app deps
+        run: npm --prefix app ci
+
+      # Prefetch builder deps (avoids first-time downloads mid-build)
+      - name: Prefetch electron-builder deps
+        run: npx electron-builder install-app-deps
+        env:
+          USE_HARD_LINKS: "false"
+
+      # Build & publish with retries
+      - name: Build & publish (mac/linux)
+        if: runner.os != 'Windows'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run dist
+          USE_HARD_LINKS: "false"
+        run: |
+          set -e
+          for i in 1 2 3; do
+            npm run dist && break || { echo "Retry $i/3"; rm -rf dist || true; sleep 5; }
+          done
+
+      - name: Build & publish (windows)
+        if: runner.os == 'Windows'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: cmd
+        run: |
+          @echo off
+          setlocal enabledelayedexpansion
+          for /l %%i in (1,1,3) do (
+            call npm run dist && goto :done
+            echo Retry %%i/3
+            rmdir /s /q dist 2>nul
+            timeout /t 5 /nobreak >nul
+          )
+          :done

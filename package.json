@@ -19,7 +19,6 @@
   "build": {
     "appId": "com.unseen",
     "productName": "Unseen Browser",
-    "asar": false,
     "directories": {
       "app": "app",
       "output": "dist"
