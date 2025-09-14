@@ -1,0 +1,22 @@
+# node
+node_modules/
+npm-debug.log*
+yarn.lock
+
+# build
+dist/
+out/
+*.log
+
+# electron cache
+**/.cache/
+**/.DS_Store
+
+# app state
+**/session.json
+**/permissions.json
+**/config.json
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+            ~/.cache/electron
+            ~/.cache/electron-builder
+          key: ${{ runner.os }}-node20-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install deps (root + app/)
+        run: npm ci
+
+      # If you want to auto-fetch Tor binaries here, do it per-OS and place under vendor/tor/<platform>/
+      # For Windows, you can download the "Tor Expert Bundle" zip and unzip into vendor/tor/win before build.
+
+      - name: Build & publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run dist

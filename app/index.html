@@ -1,0 +1,202 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Unseen Browser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html,body{margin:0;padding:0;background:#0b1118;color:#e6f0ff;font-family:system-ui,Arial}
+    .bar{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid #203040;background:#0f1620;position:sticky;top:0}
+    .btn{border:1px solid #375a7f;background:#122033;color:#cfe8ff;padding:6px 10px;border-radius:10px;cursor:pointer}
+    #url{flex:1;padding:8px 10px;border-radius:10px;border:1px solid #2a465f;background:#0b1520;color:#e6f0ff;outline:none}
+    .tabs{display:flex;gap:6px;align-items:center;overflow:auto;white-space:nowrap;max-width:35vw}
+    .tab{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #2a465f;border-radius:10px;background:#101c2a;cursor:pointer}
+    .tab.active{background:#17324b;border-color:#3b6a92}
+    .favicon{width:14px;height:14px;border-radius:3px;flex:0 0 auto;background:#233648}
+    .pill{padding:4px 8px;border:1px solid #2b4a66;border-radius:999px;background:#0d1a26}
+    .perm{display:flex;gap:8px;align-items:center}
+    .tiny{font-size:12px;opacity:.85}
+    .spinner{display:none;margin-left:8px;width:12px;height:12px;border:2px solid #4a7599;border-top-color:transparent;border-radius:50%;animation:spin 0.9s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .status{display:inline-flex;align-items:center;gap:6px;margin-left:6px}
+    .dot{width:10px;height:10px;border-radius:50%;}
+    .dot.green{background:#18a957}
+    .dot.red{background:#c23a3a}
+    .dot.gray{background:#6b7b88}
+    .torctl{display:flex;align-items:center;gap:8px}
+    .switch{position:relative;display:inline-block;width:36px;height:20px}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#2b3b4d;border-radius:999px;transition:.2s}
+    .slider:before{position:absolute;content:"";height:14px;width:14px;left:3px;top:3px;background:#cfe8ff;border-radius:50%;transition:.2s}
+    .switch input:checked + .slider{background:#2e7d32}
+    .switch input:checked + .slider:before{transform:translateX(16px)}
+    .icon-btn{border:1px solid #2b4a66;background:transparent;color:#cfe8ff;padding:4px 8px;border-radius:8px;font-size:12px}
+    .icon-btn:disabled{opacity:.5;cursor:not-allowed}
+  </style>
+</head>
+<body>
+  <div class="bar" style="gap:10px;">
+    <div class="tabs" id="tabs"></div>
+    <button class="btn" id="addTab">＋</button>
+    <button class="btn" id="back">←</button>
+    <button class="btn" id="forward">→</button>
+    <button class="btn" id="reload">⟳</button>
+
+    <select id="containerSel" class="btn">
+      <option>Private</option>
+      <option>Work</option>
+      <option>Social</option>
+    </select>
+
+    <div class="torctl">
+      <span class="tiny">Tor</span>
+      <label class="switch">
+        <input type="checkbox" id="torToggle" />
+        <span class="slider"></span>
+      </label>
+      <button class="icon-btn" id="startTorBtn" title="Start Tor" style="display:none">Start</button>
+    </div>
+
+    <div class="status">
+      <div id="netDot" class="dot gray"></div>
+      <span id="netText" class="tiny">Unknown</span>
+      <button class="btn tiny" id="probeBtn">Check</button>
+    </div>
+
+    <input id="url" type="text" placeholder="Search or URL (Ctrl/Cmd+L)"/>
+    <div class="perm">
+      <span class="tiny">Perm:</span>
+      <label class="pill tiny"><input type="checkbox" id="permMedia"/> media</label>
+      <label class="pill tiny"><input type="checkbox" id="permGeo"/> geo</label>
+    </div>
+    <div id="spinner" class="spinner"></div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    let lastState = { activeTabId: null, tabs: [], containers: [] };
+
+    $('back').onclick = () => window.ghost.back();
+    $('forward').onclick = () => window.ghost.forward();
+    $('reload').onclick = () => window.ghost.reload();
+
+    const url = $('url');
+    const go = () => window.ghost.goto(url.value.trim());
+    url.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') return go();
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
+        e.stopPropagation();
+        setTimeout(() => { url.select(); }, 0);
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l') { url.focus(); url.select(); }
+    });
+
+    $('addTab').onclick = async () => {
+      await window.ghost.newTab({ container: $('containerSel').value, url: 'https://start.duckduckgo.com/' });
+      $('probeBtn').click();
+    };
+
+    function renderTabs(state) {
+      lastState = state;
+      const cont = $('tabs'); cont.innerHTML = '';
+      for (const t of state.tabs) {
+        const el = document.createElement('div');
+        el.className = 'tab' + (t.id === state.activeTabId ? ' active' : '');
+        const icon = document.createElement('img');
+        icon.className = 'favicon';
+        icon.referrerPolicy = 'no-referrer';
+        if (t.favicon) icon.src = t.favicon;
+        el.appendChild(icon);
+        const title = document.createElement('span');
+        title.textContent = (t.title || 'New Tab').slice(0, 24);
+        el.appendChild(title);
+
+        el.title = t.url;
+        el.onclick = () => window.ghost.activateTab(t.id);
+        el.oncontextmenu = (ev) => { ev.preventDefault(); window.ghost.closeTab(t.id); };
+        cont.appendChild(el);
+
+        if (t.id === state.activeTabId) {
+          url.value = t.url || '';
+          $('containerSel').value = t.container;
+          const info = state.containers.find(c => c.name === t.container);
+          $('torToggle').checked = !!(info && info.tor);
+          try {
+            const host = new URL(t.url).hostname;
+            window.ghost.getPerm(host).then(p => {
+              $('permMedia').checked = !!p.media;
+              $('permGeo').checked = !!p.geo;
+            });
+          } catch { $('permMedia').checked = false; $('permGeo').checked = false; }
+          $('probeBtn').click();
+        }
+      }
+    }
+
+    const setIndicator = ({ok, isTor, ip, torExpected}) => {
+      const dot = $('netDot'); const txt = $('netText');
+      if (!ok) { dot.className='dot red'; txt.textContent='No network'; return; }
+      if (isTor) { dot.className='dot green'; txt.textContent=`Tor ✓ ${ip||''}`; }
+      else { dot.className='dot gray'; txt.textContent=`Direct ${ip||''}`; }
+      if (torExpected && !isTor) txt.textContent += ' (not over Tor)';
+      if (!torExpected && isTor) txt.textContent += ' (Tor on)';
+    };
+
+    $('probeBtn').onclick = async () => {
+      const c = $('containerSel').value;
+      $('netDot').className='dot gray'; $('netText').textContent='Checking...';
+      await window.ghost.probe(c);
+    };
+
+    async function updateTorStartVisibility() {
+      try {
+        const s = await window.ghost.torStatus();
+        $('startTorBtn').style.display = s && s.ready ? 'none' : 'inline-block';
+      } catch {}
+    }
+    const startBtn = $('startTorBtn');
+    startBtn.onclick = async () => {
+      startBtn.disabled = true;
+      $('netDot').className = 'dot gray';
+      $('netText').textContent = 'Starting Tor…';
+      await window.ghost.torStart();
+      startBtn.disabled = false;
+      await updateTorStartVisibility();
+      $('probeBtn').click();
+    };
+
+    window.ghost.onTabState((state) => renderTabs(state));
+    window.ghost.onLoading(({ id, loading }) => {
+      if (id === lastState.activeTabId) $('spinner').style.display = loading ? 'inline-block' : 'none';
+    });
+    window.ghost.onContainerStatus((s) => { setIndicator(s); updateTorStartVisibility(); });
+    window.ghost.onTorBoot(({ pct, msg }) => {
+      $('netDot').className = 'dot gray';
+      $('netText').textContent = `Starting Tor… ${pct}% ${msg ? '('+msg+')' : ''}`;
+    });
+    window.ghost.onTorError(({ error }) => {
+      $('netDot').className = 'dot red';
+      $('netText').textContent = `Tor error: ${error}`;
+      updateTorStartVisibility();
+    });
+
+    $('torToggle').addEventListener('change', async (e) => {
+      const container = $('containerSel').value;
+      await window.ghost.setContainerTor(container, e.target.checked);
+      $('probeBtn').click();
+      updateTorStartVisibility();
+    });
+
+    $('permMedia').addEventListener('change', async (e) => {
+      try { const host = new URL(url.value).hostname; await window.ghost.setPerm(host, 'media', e.target.checked); } catch {}
+    });
+    $('permGeo').addEventListener('change', async (e) => {
+      try { const host = new URL(url.value).hostname; await window.ghost.setPerm(host, 'geo', e.target.checked); } catch {}
+    });
+
+    (async () => { await updateTorStartVisibility(); })();
+  </script>
+</body>
+</html>
