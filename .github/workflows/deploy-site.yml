@@ -1,0 +1,33 @@
+name: Deploy site to S3 on release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-south-1
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<GHA_S3_DEPLOY_ROLE>
+
+      - name: Sync site to S3
+        run: |
+          aws s3 cp ./site/index.html s3://unseenbrowser.hnetechnologies.com/index.html --content-type text/html
+          aws s3 cp ./site/gtm.js s3://unseenbrowser.hnetechnologies.com/gtm.js --content-type application/javascript
+          aws s3 cp ./site/company_logo.png s3://unseenbrowser.hnetechnologies.com/company_logo.png --content-type image/png
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation --distribution-id <YOUR_DIST_ID> --paths "/index.html"
