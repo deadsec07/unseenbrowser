@@ -5,19 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Unseen Browser — Downloads | HNet Technologies</title>
   <meta name="description" content="Download Unseen Browser for macOS, Windows, and Linux. Private, fast, and minimal.">
-  <link rel="preload" href="company_logo.png" as="image">
-  <script src="https://cdn.tailwindcss.com?darkMode=class"></script>
+
+  <!-- Tailwind CDN (explicitly set darkMode=class) -->
+  <script>
+    window.tailwind = window.tailwind || {};
+    tailwind.config = { darkMode: 'class' };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Analytics (optional) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-S01M343L20"></script>
   <script src="gtm.js" defer></script>
 
   <!-- Font Awesome Icons -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    crossorigin="anonymous"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous"/>
 
   <style>
     body { transition: background-color 0.5s ease, color 0.5s ease; }
@@ -35,7 +36,7 @@
   <div id="progressBar" class="fixed top-0 left-0 h-1 bg-blue-600 z-50"></div>
 
   <!-- Sticky Navbar -->
-  <nav id="navbar" class="sticky top-0 z-50 bg-white bg-opacity-30 dark:bg-gray-800 dark:bg-opacity-30 backdrop-blur flex justify-between items-center px-6 py-3">
+  <nav class="sticky top-0 z-50 bg-white/30 dark:bg-gray-800/30 backdrop-blur flex justify-between items-center px-6 py-3">
     <div class="flex space-x-4">
       <a href="#hero" class="text-gray-800 dark:text-gray-100 hover:underline">Home</a>
       <a href="#downloads" class="text-gray-800 dark:text-gray-100 hover:underline">Downloads</a>
@@ -50,7 +51,13 @@
   <!-- HERO -->
   <header id="hero" class="bg-gradient-to-r from-blue-600 to-purple-600 py-12">
     <div class="max-w-4xl mx-auto px-6 text-center">
-      <img src="company_logo.png" alt="HNet Technologies Logo" loading="lazy" class="parallax-logo mx-auto mb-6 w-[50vw] max-w-none" />
+      <!-- Smaller, responsive logo -->
+      <img
+        src="company_logo.png"
+        alt="Unseen Browser Logo"
+        loading="lazy"
+        class="parallax-logo mx-auto mb-6 w-40 sm:w-56 md:w-64 lg:w-72 h-auto"
+      />
       <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Unseen Browser</h1>
       <p class="text-white/90 mb-6">Private • Fast • Minimal</p>
       <a href="#downloads" class="inline-block bg-white text-blue-600 font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-gray-100 transition">
@@ -64,7 +71,6 @@
     <div class="max-w-5xl mx-auto px-6">
       <h2 class="text-4xl font-bold text-center mb-12">Downloads</h2>
 
-      <!-- Status / latest info -->
       <div id="releaseInfo" class="text-center text-sm text-gray-600 dark:text-gray-400 mb-8"></div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -102,7 +108,10 @@
         </div>
       </div>
 
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">Looking for other assets (blockmaps, YAMLs, zips)? See the full <a id="rel-page" href="#" target="_blank" rel="noopener" class="underline">GitHub release page</a>.</p>
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+        Looking for other assets (blockmaps, YAMLs, zips)? See the full
+        <a id="rel-page" href="https://github.com/deadsec07/unseenbrowser/releases" target="_blank" rel="noopener" class="underline">GitHub release page</a>.
+      </p>
     </div>
   </section>
 
@@ -114,15 +123,15 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
         <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
           <h3 class="font-semibold mb-2">macOS</h3>
-          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>shasum -a 256 Unseen-Browser-0.2.0-arm64.dmg</code></pre>
+          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>shasum -a 256 *.dmg</code></pre>
         </div>
         <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
           <h3 class="font-semibold mb-2">Windows</h3>
-          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>certutil -hashfile unseenbrowser-Setup-0.2.0.exe SHA256</code></pre>
+          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>certutil -hashfile unseenbrowser-Setup-*.exe SHA256</code></pre>
         </div>
         <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
           <h3 class="font-semibold mb-2">Linux</h3>
-          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>sha256sum Unseen-Browser-0.2.0.AppImage</code></pre>
+          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>sha256sum *.AppImage</code></pre>
         </div>
       </div>
     </div>
@@ -140,7 +149,7 @@
     </div>
   </section>
 
-  <!-- CONTACT/FOOTER -->
+  <!-- CONTACT -->
   <section id="contact" class="py-10">
     <div class="max-w-3xl mx-auto px-6 text-center">
       <a href="tel:+94701668800" class="inline-block bg-white text-blue-600 font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-gray-100 transition">
@@ -149,14 +158,15 @@
     </div>
   </section>
 
+  <!-- FOOTER -->
   <footer class="py-8 text-center text-gray-600 dark:text-gray-400">
-    &copy; 2025 HNet Technologies. All rights reserved.
+    &copy; 2025 <a href="https://hnetechnologies.com" class="underline" target="_blank" rel="noopener">HNet Technologies</a>. All rights reserved.
   </footer>
 
-  <!-- JS: theme, scroll, reveal, back-to-top + GitHub release loader -->
+  <!-- JS -->
   <script>
     const REPO = 'deadsec07/unseenbrowser';
-    const API = `https://api.github.com/repos/${REPO}/releases/latest`;
+    const API  = `https://api.github.com/repos/${REPO}/releases/latest`;
 
     function fmtBytes(b) {
       if (!b && b !== 0) return '—';
@@ -166,27 +176,19 @@
     }
 
     function parseShaMapFromBody(body) {
-      // Accept lines like:
-      // Unseen-Browser-0.2.0-arm64.dmg
-      // sha256:dede4499... (64 hex)
       const map = {};
       if (!body) return map;
-      const lines = body.split(/\\r?\\n/);
+      const lines = body.split(/\r?\n/);   // <-- correct regex
       for (let i = 0; i < lines.length; i++) {
         const name = lines[i].trim();
         const next = (lines[i+1] || '').trim();
         const m = /^sha256:([a-f0-9]{64})$/i.exec(next);
-        if (name && m) {
-          map[name] = m[1];
-          i++;
-        }
+        if (name && m) { map[name] = m[1]; i++; }
       }
       return map;
     }
 
-    function pickAsset(assets, regex) {
-      return assets.find(a => regex.test(a.name));
-    }
+    function pickAsset(assets, regex) { return assets.find(a => regex.test(a.name)); }
 
     function setCard(prefix, asset, shaMap) {
       const nameEl = document.getElementById(prefix+'-name');
@@ -207,13 +209,8 @@
       linkEl.href = asset.browser_download_url;
 
       const sha = shaMap[asset.name];
-      if (sha) {
-        shaEl.innerHTML = '<span class="font-semibold">SHA-256:</span> ' + sha;
-      } else {
-        shaEl.textContent = '';
-      }
+      shaEl.innerHTML = sha ? `<span class="font-semibold">SHA-256:</span> ${sha}` : '';
 
-      // Analytics hook
       linkEl.addEventListener('click', () => {
         if (window.gtag) gtag('event','download',{ os: prefix, file: asset.name, size: asset.size });
       });
@@ -221,27 +218,27 @@
 
     function detectOS() {
       const ua = navigator.userAgent.toLowerCase();
-      if (ua.includes('mac')) return 'mac';
-      if (ua.includes('win')) return 'win';
-      if (ua.includes('linux')) return 'linux';
+      if (/mac|darwin|iphone|ipad/.test(ua)) return 'mac';
+      if (/win/.test(ua)) return 'win';
+      if (/linux/.test(ua)) return 'linux';
       return null;
     }
 
     async function loadRelease() {
       const res = await fetch(API, { headers: { 'Accept': 'application/vnd.github+json' }});
+      if (!res.ok) throw new Error('GitHub API error: ' + res.status);
       const data = await res.json();
 
-      document.getElementById('releaseInfo').innerHTML =
-        data.tag_name
-          ? \`Latest: <strong>\${data.tag_name}</strong> • \${new Date(data.published_at).toLocaleString()} • <a class="underline" href="\${data.html_url}" target="_blank" rel="noopener">GitHub</a>\`
-          : 'Latest release info unavailable';
+      document.getElementById('releaseInfo').innerHTML = data.tag_name
+        ? `Latest: <strong>${data.tag_name}</strong> • ${new Date(data.published_at).toLocaleString()} • <a class="underline" href="${data.html_url}" target="_blank" rel="noopener">GitHub</a>`
+        : 'Latest release info unavailable';
 
       const assets = Array.isArray(data.assets) ? data.assets : [];
       const shaMap = parseShaMapFromBody(data.body || '');
 
-      const mac   = pickAsset(assets, /\\.dmg$/i) || pickAsset(assets, /arm64.*\\.dmg$/i);
-      const win   = pickAsset(assets, /\\.exe$/i);
-      const linux = pickAsset(assets, /\\.AppImage$/i);
+      const mac   = pickAsset(assets, /\.dmg$/i) || pickAsset(assets, /arm64.*\.dmg$/i);
+      const win   = pickAsset(assets, /\.exe$/i);
+      const linux = pickAsset(assets, /\.AppImage$/i);
 
       document.getElementById('rel-page').href = data.html_url || '#';
 
@@ -249,15 +246,16 @@
       setCard('win', win, shaMap);
       setCard('linux', linux, shaMap);
 
-      // Auto-highlight card for visitor OS
       const os = detectOS();
       if (os) document.getElementById('card-' + os).classList.add('ring-2','ring-blue-500');
     }
 
-    // ===== THEME + EFFECTS (same behavior as your previous page)
-    window.addEventListener('DOMContentLoaded', () => {
+    // ===== THEME + EFFECTS =====
+    (function initUI() {
       const themeToggle = document.getElementById('themeToggle');
       const themeIcon = document.getElementById('themeIcon');
+      const downloadsEl = document.getElementById('downloads');
+      const logo = document.querySelector('.parallax-logo');
 
       const isDark = () => {
         const stored = localStorage.getItem('theme');
@@ -269,34 +267,28 @@
         themeIcon.className = isDark() ? 'fas fa-sun' : 'fas fa-moon';
       };
 
-      themeToggle.addEventListener('click', () => {
-        localStorage.setItem('theme', isDark() ? 'light' : 'dark');
-        applyTheme();
-        onScroll();
-      });
-
-      applyTheme();
-
-      const colors = { hero: '#2563EB', expertise: '#F3F4F6', contact: '#1E3A8A' };
-      const contEl = document.getElementById('downloads');
-      const logo = document.querySelector('.parallax-logo');
-
-      window.onScroll = () => {
+      function onScroll() {
         const mid = window.scrollY + window.innerHeight / 2;
         if (!isDark()) {
-          if (mid < contEl.offsetTop) document.body.style.backgroundColor = colors.hero;
-          else document.body.style.backgroundColor = colors.expertise;
+          document.body.style.backgroundColor = (mid < downloadsEl.offsetTop) ? '#2563EB' : '#F3F4F6';
         } else {
           document.body.style.backgroundColor = '';
         }
-        if (logo) logo.style.transform = \`translateY(\${window.scrollY * 0.3}px)\`;
+        if (logo) logo.style.transform = `translateY(${window.scrollY * 0.3}px)`;
         const docH = document.documentElement.scrollHeight - window.innerHeight;
         document.getElementById('progressBar').style.width = ((window.scrollY / docH) * 100) + '%';
-      };
+      }
+
+      themeToggle.addEventListener('click', () => {
+        localStorage.setItem('theme', isDark() ? 'light' : 'dark');
+        applyTheme(); onScroll();
+      });
+      applyTheme();
 
       window.addEventListener('scroll', onScroll);
       onScroll();
 
+      // Reveal animations
       document.querySelectorAll('.reveal').forEach(el => {
         new IntersectionObserver(
           entries => entries.forEach(e => e.isIntersecting && el.classList.add('visible')),
@@ -304,10 +296,11 @@
         ).observe(el);
       });
 
+      // Load latest release
       loadRelease().catch(() => {
         document.getElementById('releaseInfo').textContent = 'Could not load GitHub release info.';
       });
-    });
+    })();
   </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 {
   "name": "unseenbrowser",
-  "version": "0.2.0",
+  "version": "0.2.6",
   "description": "Privacy-first browser with Tor mode, container tabs, adblock, and per-site permissions",
   "author": "HNE Technologies",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "scripts": {
     "start": "electron app",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder",
+    "dist": "electron-builder -p always",
     "postinstall": "cd app && npm i"
   },
   "devDependencies": {
@@ -29,6 +29,6 @@
     "mac": { "category": "public.app-category.utilities", "target": ["dmg","zip"] },
     "win": { "target": ["nsis"], "artifactName": "unseenbrowser-Setup-${version}.exe" },
     "linux": { "target": ["AppImage","deb"], "category": "Utility" },
-    "publish": [{ "provider": "github", "owner": "deadsec07", "repo": "unseenbrowser" }]
+    "publish": [{ "provider": "github", "owner": "deadsec07", "repo": "unseenbrowser", "releaseType": "release" }]
   }
 }
