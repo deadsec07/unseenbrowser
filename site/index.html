@@ -67,53 +67,101 @@
   </header>
 
   <!-- DOWNLOADS -->
-  <section id="downloads" class="py-16">
-    <div class="max-w-5xl mx-auto px-6">
-      <h2 class="text-4xl font-bold text-center mb-12">Downloads</h2>
+      <section id="downloads" class="py-16">
+      <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-12">Downloads</h2>
 
-      <div id="releaseInfo" class="text-center text-sm text-gray-600 dark:text-gray-400 mb-8"></div>
+        <div id="releaseInfo" class="text-center text-sm text-gray-600 dark:text-gray-400 mb-8"></div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- macOS -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal" id="card-mac">
-          <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-apple"></i></div>
-          <h3 class="text-2xl font-semibold mb-2">macOS (.dmg)</h3>
-          <p class="mb-4">Apple Silicon support. Drag to Applications.</p>
-          <div class="text-sm mb-2"><span class="font-semibold">File:</span> <span id="mac-name">—</span></div>
-          <div class="text-sm mb-2"><span class="font-semibold">Size:</span> <span id="mac-size">—</span></div>
-          <div class="text-xs mb-4" id="mac-sha" style="word-break: break-all;"></div>
-          <a id="mac-link" href="#" class="inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 disabled:opacity-50" target="_blank" rel="noopener">Download for macOS</a>
+        <!-- Equal-height cards, buttons pinned to bottom -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+
+          <!-- macOS -->
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal h-full flex flex-col" id="card-mac">
+            <div>
+              <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-apple"></i></div>
+              <h3 class="text-2xl font-semibold mb-2">macOS (.dmg)</h3>
+              <p class="mb-4">Apple Silicon support. Drag to Applications.</p>
+
+              <!-- Reserve space to avoid layout shift -->
+              <div class="space-y-1 min-h-[96px]">
+                <div class="text-sm">
+                  <span class="font-semibold">File:</span>
+                  <span id="mac-name" class="truncate inline-block max-w-full align-bottom" title="—">—</span>
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Size:</span>
+                  <span id="mac-size">—</span>
+                </div>
+                <div class="text-xs" id="mac-sha" style="word-break: break-all;"></div>
+              </div>
+            </div>
+
+            <a id="mac-link" href="#"
+               class="mt-auto inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 opacity-60 pointer-events-none"
+               target="_blank" rel="noopener">Download for macOS</a>
+          </div>
+
+          <!-- Windows -->
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal h-full flex flex-col" id="card-win">
+            <div>
+              <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-windows"></i></div>
+              <h3 class="text-2xl font-semibold mb-2">Windows (.exe)</h3>
+              <p class="mb-4">Standard installer. Run and follow prompts.</p>
+
+              <!-- Reserve space to avoid layout shift -->
+              <div class="space-y-1 min-h-[96px]">
+                <div class="text-sm">
+                  <span class="font-semibold">File:</span>
+                  <span id="win-name" class="truncate inline-block max-w-full align-bottom" title="—">—</span>
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Size:</span>
+                  <span id="win-size">—</span>
+                </div>
+                <div class="text-xs" id="win-sha" style="word-break: break-all;"></div>
+              </div>
+            </div>
+
+            <a id="win-link" href="#"
+               class="mt-auto inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 opacity-60 pointer-events-none"
+               target="_blank" rel="noopener">Download for Windows</a>
+          </div>
+
+          <!-- Linux -->
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal h-full flex flex-col" id="card-linux">
+            <div>
+              <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-linux"></i></div>
+              <h3 class="text-2xl font-semibold mb-2">Linux (.AppImage)</h3>
+              <p class="mb-4">Make executable, then run.</p>
+
+              <!-- Reserve space to avoid layout shift -->
+              <div class="space-y-1 min-h-[96px]">
+                <div class="text-sm">
+                  <span class="font-semibold">File:</span>
+                  <span id="linux-name" class="truncate inline-block max-w-full align-bottom" title="—">—</span>
+                </div>
+                <div class="text-sm">
+                  <span class="font-semibold">Size:</span>
+                  <span id="linux-size">—</span>
+                </div>
+                <div class="text-xs" id="linux-sha" style="word-break: break-all;"></div>
+              </div>
+            </div>
+
+            <a id="linux-link" href="#"
+               class="mt-auto inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 opacity-60 pointer-events-none"
+               target="_blank" rel="noopener">Download for Linux</a>
+          </div>
+
         </div>
 
-        <!-- Windows -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal" id="card-win">
-          <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-windows"></i></div>
-          <h3 class="text-2xl font-semibold mb-2">Windows (.exe)</h3>
-          <p class="mb-4">Standard installer. Run and follow prompts.</p>
-          <div class="text-sm mb-2"><span class="font-semibold">File:</span> <span id="win-name">—</span></div>
-          <div class="text-sm mb-2"><span class="font-semibold">Size:</span> <span id="win-size">—</span></div>
-          <div class="text-xs mb-4" id="win-sha" style="word-break: break-all;"></div>
-          <a id="win-link" href="#" class="inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 disabled:opacity-50" target="_blank" rel="noopener">Download for Windows</a>
-        </div>
-
-        <!-- Linux -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal" id="card-linux">
-          <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-linux"></i></div>
-          <h3 class="text-2xl font-semibold mb-2">Linux (.AppImage)</h3>
-          <p class="mb-4">Make executable, then run.</p>
-          <div class="text-sm mb-2"><span class="font-semibold">File:</span> <span id="linux-name">—</span></div>
-          <div class="text-sm mb-2"><span class="font-semibold">Size:</span> <span id="linux-size">—</span></div>
-          <div class="text-xs mb-4" id="linux-sha" style="word-break: break-all;"></div>
-          <a id="linux-link" href="#" class="inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 disabled:opacity-50" target="_blank" rel="noopener">Download for Linux</a>
-        </div>
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+          Looking for other assets (blockmaps, YAMLs, zips)? See the full
+          <a id="rel-page" href="#" target="_blank" rel="noopener" class="underline">GitHub release page</a>.
+        </p>
       </div>
-
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-        Looking for other assets (blockmaps, YAMLs, zips)? See the full
-        <a id="rel-page" href="https://github.com/deadsec07/unseenbrowser/releases" target="_blank" rel="noopener" class="underline">GitHub release page</a>.
-      </p>
-    </div>
-  </section>
+    </section>
 
   <!-- VERIFY -->
   <section id="verify" class="py-16">
@@ -191,30 +239,32 @@
     function pickAsset(assets, regex) { return assets.find(a => regex.test(a.name)); }
 
     function setCard(prefix, asset, shaMap) {
-      const nameEl = document.getElementById(prefix+'-name');
-      const sizeEl = document.getElementById(prefix+'-size');
-      const linkEl = document.getElementById(prefix+'-link');
-      const shaEl  = document.getElementById(prefix+'-sha');
+        const nameEl = document.getElementById(prefix+'-name');
+        const sizeEl = document.getElementById(prefix+'-size');
+        const linkEl = document.getElementById(prefix+'-link');
+        const shaEl  = document.getElementById(prefix+'-sha');
 
-      if (!asset) {
-        nameEl.textContent = 'Not found in latest release';
-        sizeEl.textContent = '—';
-        linkEl.classList.add('opacity-60','pointer-events-none');
-        shaEl.textContent = '';
-        return;
+        if (!asset) {
+          nameEl.textContent = 'Not found in release';
+          sizeEl.textContent = 'N/A';
+          linkEl.classList.add('opacity-60','pointer-events-none');
+          return;
+        }
+
+        nameEl.textContent = asset.name;
+        nameEl.setAttribute('title', asset.name);     // show full on hover
+        sizeEl.textContent = fmtBytes(asset.size);
+        linkEl.href = asset.browser_download_url;
+        linkEl.classList.remove('opacity-60','pointer-events-none');
+
+        const sha = shaMap[asset.name];
+        if (sha) {
+          const short = `${sha.slice(0,12)}…${sha.slice(-6)}`;
+          shaEl.innerHTML = `<span class="font-semibold">SHA-256:</span> <span title="${sha}">${short}</span>`;
+        } else {
+          shaEl.textContent = '';
+        }
       }
-
-      nameEl.textContent = asset.name;
-      sizeEl.textContent = fmtBytes(asset.size);
-      linkEl.href = asset.browser_download_url;
-
-      const sha = shaMap[asset.name];
-      shaEl.innerHTML = sha ? `<span class="font-semibold">SHA-256:</span> ${sha}` : '';
-
-      linkEl.addEventListener('click', () => {
-        if (window.gtag) gtag('event','download',{ os: prefix, file: asset.name, size: asset.size });
-      });
-    }
 
     function detectOS() {
       const ua = navigator.userAgent.toLowerCase();

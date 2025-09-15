@@ -1,11 +1,14 @@
 {
   "name": "unseenbrowser",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "description": "Privacy-first browser with Tor mode, container tabs, adblock, and per-site permissions",
   "author": "HNE Technologies",
   "license": "MIT",
   "private": true,
-  "repository": { "type": "git", "url": "https://github.com/deadsec07/unseenbrowser.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deadsec07/unseenbrowser.git"
+  },
   "scripts": {
     "start": "electron app",
     "pack": "electron-builder --dir",
@@ -14,7 +17,8 @@
   },
   "devDependencies": {
     "electron": "^30.5.1",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "electron-icon-builder": "^2.0.1"
   },
   "build": {
     "appId": "com.unseen",
@@ -24,11 +28,42 @@
       "output": "dist"
     },
     "extraResources": [
-      { "from": "vendor/tor", "to": "tor" }
+      {
+        "from": "vendor/tor",
+        "to": "tor"
+      }
     ],
-    "mac": { "category": "public.app-category.utilities", "target": ["dmg","zip"] },
-    "win": { "target": ["nsis"], "artifactName": "unseenbrowser-Setup-${version}.exe" },
-    "linux": { "target": ["AppImage","deb"], "category": "Utility" },
-    "publish": [{ "provider": "github", "owner": "deadsec07", "repo": "unseenbrowser", "releaseType": "release" }]
+    "icon": "build/icons/icon.png",
+    "mac": {
+      "icon": "build/icons/icon.icns",
+      "category": "public.app-category.utilities",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "build/icons/icon.ico",
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "unseenbrowser-Setup-${version}.exe"
+    },
+    "linux": {
+      "icon": "build/icons",
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "deadsec07",
+        "repo": "unseenbrowser",
+        "releaseType": "release"
+      }
+    ]
   }
 }

@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Welcome • Unseen Browser</title>
+  <style>
+    body{margin:0;background:#0b1118;color:#e6f0ff;font-family:system-ui,Arial;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .card{max-width:720px;padding:32px;background:#0f1620;border:1px solid #203040;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35);text-align:center}
+    img{width:72px;height:72px;border-radius:14px;margin-bottom:14px}
+    h1{margin:.2rem 0 1rem 0}
+    p{opacity:.9;line-height:1.5}
+    button{margin-top:18px;padding:10px 16px;border-radius:10px;border:1px solid #375a7f;background:#122033;color:#cfe8ff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="./assets/logo.png" alt="Unseen"/>
+    <h1>Welcome to Unseen Browser</h1>
+    <p>Per-container Tor routing, tracker blocking, and minimal footprint. Toggle Tor per container, see a live indicator, and keep sites compartmentalized.</p>
+    <button onclick="start()">Start browsing</button>
+  </div>
+  <script>
+    function start(){ location.href = 'https://start.duckduckgo.com/'; }
+  </script>
+</body>
+</html>

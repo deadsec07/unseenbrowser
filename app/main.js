@@ -1,6 +1,7 @@
 const { app, BrowserWindow, BrowserView, session, ipcMain, Menu, shell, globalShortcut, clipboard } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { pathToFileURL } = require('url');
 const { v4: uuidv4 } = require('uuid');
 const { autoUpdater } = require('electron-updater');
 const { TorManager } = require('./tor');
@@ -19,6 +20,10 @@ app.commandLine.appendSwitch('force-webrtc-ip-handling-policy','disable_non_prox
 
 let win;
 const tor = new TorManager(app);
+
+const FIRST_RUN_FILE = path.join(app.getPath('userData'), 'first-run.json');
+function isFirstRun() { return !fs.existsSync(FIRST_RUN_FILE); }
+function markFirstRunDone() { try { fs.writeFileSync(FIRST_RUN_FILE, JSON.stringify({ done: true })); } catch {} }
 
 // ---- Config & Session files ----
 const SESSION_FILE = path.join(app.getPath('userData'), 'session.json');
@@ -385,8 +390,12 @@ async function restoreSession() {
 function createWindow(){
   win = new BrowserWindow({
     width: 1200, height: 800, title: 'Unseen Browser',
+    icon: path.join(__dirname, 'assets', 'logo.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation:true, sandbox:true, nodeIntegration:false }
   });
+  if (process.platform === 'darwin') {
+    try { app.dock.setIcon(path.join(__dirname, 'assets', 'logo.png')); } catch {}
+  }
   buildMenu();
   wireUIContextMenu();
   win.loadFile('index.html');
@@ -406,7 +415,13 @@ app.whenReady().then(async () => {
   createWindow();
   registerShortcuts();
   const restored = await restoreSession();
-  if (!restored) await createTab({ container: 'Private' });
+  if (!restored) {
+    const startURL = isFirstRun()
+      ? pathToFileURL(path.join(__dirname, 'welcome.html')).toString()
+      : 'https://start.duckduckgo.com/';
+    await createTab({ container: 'Private', startURL });
+    if (isFirstRun()) markFirstRunDone();
+  }
   probeContainer('Private');
 });
 app.on('window-all-closed', () => { tor.stop(); app.quit(); });
