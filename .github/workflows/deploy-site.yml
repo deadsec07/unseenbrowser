@@ -2,7 +2,7 @@ name: Deploy site to S3
 
 on:
   workflow_run:
-    workflows: ["Release"]   # must match the 'name:' in release.yml
+    workflows: ["Release"]   # must match name: in your release.yml
     types: [completed]
   workflow_dispatch:
 
@@ -11,27 +11,37 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-site-${{ github.event.workflow_run?.head_sha || github.sha }}
+  group: deploy-site-${{ github.run_id }}
   cancel-in-progress: true
 
 jobs:
   deploy:
-    # Run when Release workflow succeeded OR manual dispatch
+    # run only if the Release workflow succeeded, or if manually dispatched
     if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the same commit as Release
+      # If triggered by workflow_run, check out the *same commit* that built the release
+      - name: Checkout (same commit as Release)
+        if: ${{ github.event_name == 'workflow_run' }}
         uses: actions/checkout@v4
         with:
-          # For workflow_dispatch, this falls back to the default branch HEAD
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      # If triggered manually, just check out default branch HEAD
+      - name: Checkout (default)
+        if: ${{ github.event_name != 'workflow_run' }}
+        uses: actions/checkout@v4
 
       - name: Configure AWS creds (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION || 'ap-south-1' }}
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_UNSEEN }}
+
+      # (optional) sanity: show which account/role is assumed
+      - name: Who am I
+        run: aws sts get-caller-identity
 
       - name: Upload site files
         run: |
