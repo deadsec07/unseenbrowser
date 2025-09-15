@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unseen Browser — Downloads | HNet Technologies</title>
+  <meta name="description" content="Download Unseen Browser for macOS, Windows, and Linux. Private, fast, and minimal.">
+  <link rel="preload" href="company_logo.png" as="image">
+  <script src="https://cdn.tailwindcss.com?darkMode=class"></script>
+
+  <!-- Analytics (optional) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S01M343L20"></script>
+  <script src="gtm.js" defer></script>
+
+  <!-- Font Awesome Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+  />
+
+  <style>
+    body { transition: background-color 0.5s ease, color 0.5s ease; }
+    .reveal { opacity: 0; transform: translateY(1.5rem); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .animate-spin-slow { animation: spin 3s linear infinite; }
+    #progressBar { width: 0; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 antialiased">
+
+  <!-- Scroll Progress Bar -->
+  <div id="progressBar" class="fixed top-0 left-0 h-1 bg-blue-600 z-50"></div>
+
+  <!-- Sticky Navbar -->
+  <nav id="navbar" class="sticky top-0 z-50 bg-white bg-opacity-30 dark:bg-gray-800 dark:bg-opacity-30 backdrop-blur flex justify-between items-center px-6 py-3">
+    <div class="flex space-x-4">
+      <a href="#hero" class="text-gray-800 dark:text-gray-100 hover:underline">Home</a>
+      <a href="#downloads" class="text-gray-800 dark:text-gray-100 hover:underline">Downloads</a>
+      <a href="#verify" class="text-gray-800 dark:text-gray-100 hover:underline">Verify</a>
+      <a href="#faq" class="text-gray-800 dark:text-gray-100 hover:underline">FAQ</a>
+    </div>
+    <button id="themeToggle" class="text-gray-800 dark:text-gray-100 focus:outline-none" aria-label="Toggle theme">
+      <i id="themeIcon" class="fas fa-moon"></i>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <header id="hero" class="bg-gradient-to-r from-blue-600 to-purple-600 py-12">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <img src="company_logo.png" alt="HNet Technologies Logo" loading="lazy" class="parallax-logo mx-auto mb-6 w-[50vw] max-w-none" />
+      <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Unseen Browser</h1>
+      <p class="text-white/90 mb-6">Private • Fast • Minimal</p>
+      <a href="#downloads" class="inline-block bg-white text-blue-600 font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-gray-100 transition">
+        Go to Downloads
+      </a>
+    </div>
+  </header>
+
+  <!-- DOWNLOADS -->
+  <section id="downloads" class="py-16">
+    <div class="max-w-5xl mx-auto px-6">
+      <h2 class="text-4xl font-bold text-center mb-12">Downloads</h2>
+
+      <!-- Status / latest info -->
+      <div id="releaseInfo" class="text-center text-sm text-gray-600 dark:text-gray-400 mb-8"></div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- macOS -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal" id="card-mac">
+          <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-apple"></i></div>
+          <h3 class="text-2xl font-semibold mb-2">macOS (.dmg)</h3>
+          <p class="mb-4">Apple Silicon support. Drag to Applications.</p>
+          <div class="text-sm mb-2"><span class="font-semibold">File:</span> <span id="mac-name">—</span></div>
+          <div class="text-sm mb-2"><span class="font-semibold">Size:</span> <span id="mac-size">—</span></div>
+          <div class="text-xs mb-4" id="mac-sha" style="word-break: break-all;"></div>
+          <a id="mac-link" href="#" class="inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 disabled:opacity-50" target="_blank" rel="noopener">Download for macOS</a>
+        </div>
+
+        <!-- Windows -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal" id="card-win">
+          <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-windows"></i></div>
+          <h3 class="text-2xl font-semibold mb-2">Windows (.exe)</h3>
+          <p class="mb-4">Standard installer. Run and follow prompts.</p>
+          <div class="text-sm mb-2"><span class="font-semibold">File:</span> <span id="win-name">—</span></div>
+          <div class="text-sm mb-2"><span class="font-semibold">Size:</span> <span id="win-size">—</span></div>
+          <div class="text-xs mb-4" id="win-sha" style="word-break: break-all;"></div>
+          <a id="win-link" href="#" class="inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 disabled:opacity-50" target="_blank" rel="noopener">Download for Windows</a>
+        </div>
+
+        <!-- Linux -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition reveal" id="card-linux">
+          <div class="text-5xl text-blue-600 mb-4"><i class="fa-brands fa-linux"></i></div>
+          <h3 class="text-2xl font-semibold mb-2">Linux (.AppImage)</h3>
+          <p class="mb-4">Make executable, then run.</p>
+          <div class="text-sm mb-2"><span class="font-semibold">File:</span> <span id="linux-name">—</span></div>
+          <div class="text-sm mb-2"><span class="font-semibold">Size:</span> <span id="linux-size">—</span></div>
+          <div class="text-xs mb-4" id="linux-sha" style="word-break: break-all;"></div>
+          <a id="linux-link" href="#" class="inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow hover:bg-blue-500 disabled:opacity-50" target="_blank" rel="noopener">Download for Linux</a>
+        </div>
+      </div>
+
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">Looking for other assets (blockmaps, YAMLs, zips)? See the full <a id="rel-page" href="#" target="_blank" rel="noopener" class="underline">GitHub release page</a>.</p>
+    </div>
+  </section>
+
+  <!-- VERIFY -->
+  <section id="verify" class="py-16">
+    <div class="max-w-4xl mx-auto px-6">
+      <h2 class="text-3xl font-bold mb-6">Verify your download (SHA-256)</h2>
+      <p class="mb-4">We publish checksums in the release notes. Compare your file’s hash to the listed value.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+          <h3 class="font-semibold mb-2">macOS</h3>
+          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>shasum -a 256 Unseen-Browser-0.2.0-arm64.dmg</code></pre>
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+          <h3 class="font-semibold mb-2">Windows</h3>
+          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>certutil -hashfile unseenbrowser-Setup-0.2.0.exe SHA256</code></pre>
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+          <h3 class="font-semibold mb-2">Linux</h3>
+          <pre class="p-3 bg-gray-900 text-gray-100 rounded-md overflow-auto"><code>sha256sum Unseen-Browser-0.2.0.AppImage</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-16">
+    <div class="max-w-4xl mx-auto px-6">
+      <h2 class="text-3xl font-bold mb-6">Quick install tips</h2>
+      <ul class="list-disc pl-6 space-y-2">
+        <li><strong>macOS:</strong> If Gatekeeper warns, right-click → Open once, or allow in System Settings → Privacy & Security.</li>
+        <li><strong>Windows:</strong> If SmartScreen warns, click “More info” → “Run anyway.”</li>
+        <li><strong>Linux:</strong> <code>chmod +x *.AppImage</code> then run the file.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- CONTACT/FOOTER -->
+  <section id="contact" class="py-10">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+      <a href="tel:+94701668800" class="inline-block bg-white text-blue-600 font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-gray-100 transition">
+        <i class="fas fa-phone-alt mr-2"></i>+94 70 166 8800
+      </a>
+    </div>
+  </section>
+
+  <footer class="py-8 text-center text-gray-600 dark:text-gray-400">
+    &copy; 2025 HNet Technologies. All rights reserved.
+  </footer>
+
+  <!-- JS: theme, scroll, reveal, back-to-top + GitHub release loader -->
+  <script>
+    const REPO = 'deadsec07/unseenbrowser';
+    const API = `https://api.github.com/repos/${REPO}/releases/latest`;
+
+    function fmtBytes(b) {
+      if (!b && b !== 0) return '—';
+      const u = ['B','KB','MB','GB','TB']; let i = 0; let n = b;
+      while (n >= 1024 && i < u.length-1) { n /= 1024; i++; }
+      return `${n.toFixed(n < 10 && i > 0 ? 1 : 0)} ${u[i]}`;
+    }
+
+    function parseShaMapFromBody(body) {
+      // Accept lines like:
+      // Unseen-Browser-0.2.0-arm64.dmg
+      // sha256:dede4499... (64 hex)
+      const map = {};
+      if (!body) return map;
+      const lines = body.split(/\\r?\\n/);
+      for (let i = 0; i < lines.length; i++) {
+        const name = lines[i].trim();
+        const next = (lines[i+1] || '').trim();
+        const m = /^sha256:([a-f0-9]{64})$/i.exec(next);
+        if (name && m) {
+          map[name] = m[1];
+          i++;
+        }
+      }
+      return map;
+    }
+
+    function pickAsset(assets, regex) {
+      return assets.find(a => regex.test(a.name));
+    }
+
+    function setCard(prefix, asset, shaMap) {
+      const nameEl = document.getElementById(prefix+'-name');
+      const sizeEl = document.getElementById(prefix+'-size');
+      const linkEl = document.getElementById(prefix+'-link');
+      const shaEl  = document.getElementById(prefix+'-sha');
+
+      if (!asset) {
+        nameEl.textContent = 'Not found in latest release';
+        sizeEl.textContent = '—';
+        linkEl.classList.add('opacity-60','pointer-events-none');
+        shaEl.textContent = '';
+        return;
+      }
+
+      nameEl.textContent = asset.name;
+      sizeEl.textContent = fmtBytes(asset.size);
+      linkEl.href = asset.browser_download_url;
+
+      const sha = shaMap[asset.name];
+      if (sha) {
+        shaEl.innerHTML = '<span class="font-semibold">SHA-256:</span> ' + sha;
+      } else {
+        shaEl.textContent = '';
+      }
+
+      // Analytics hook
+      linkEl.addEventListener('click', () => {
+        if (window.gtag) gtag('event','download',{ os: prefix, file: asset.name, size: asset.size });
+      });
+    }
+
+    function detectOS() {
+      const ua = navigator.userAgent.toLowerCase();
+      if (ua.includes('mac')) return 'mac';
+      if (ua.includes('win')) return 'win';
+      if (ua.includes('linux')) return 'linux';
+      return null;
+    }
+
+    async function loadRelease() {
+      const res = await fetch(API, { headers: { 'Accept': 'application/vnd.github+json' }});
+      const data = await res.json();
+
+      document.getElementById('releaseInfo').innerHTML =
+        data.tag_name
+          ? \`Latest: <strong>\${data.tag_name}</strong> • \${new Date(data.published_at).toLocaleString()} • <a class="underline" href="\${data.html_url}" target="_blank" rel="noopener">GitHub</a>\`
+          : 'Latest release info unavailable';
+
+      const assets = Array.isArray(data.assets) ? data.assets : [];
+      const shaMap = parseShaMapFromBody(data.body || '');
+
+      const mac   = pickAsset(assets, /\\.dmg$/i) || pickAsset(assets, /arm64.*\\.dmg$/i);
+      const win   = pickAsset(assets, /\\.exe$/i);
+      const linux = pickAsset(assets, /\\.AppImage$/i);
+
+      document.getElementById('rel-page').href = data.html_url || '#';
+
+      setCard('mac', mac, shaMap);
+      setCard('win', win, shaMap);
+      setCard('linux', linux, shaMap);
+
+      // Auto-highlight card for visitor OS
+      const os = detectOS();
+      if (os) document.getElementById('card-' + os).classList.add('ring-2','ring-blue-500');
+    }
+
+    // ===== THEME + EFFECTS (same behavior as your previous page)
+    window.addEventListener('DOMContentLoaded', () => {
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+
+      const isDark = () => {
+        const stored = localStorage.getItem('theme');
+        if (stored === 'light' || stored === 'dark') return stored === 'dark';
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      };
+      const applyTheme = () => {
+        document.documentElement.classList.toggle('dark', isDark());
+        themeIcon.className = isDark() ? 'fas fa-sun' : 'fas fa-moon';
+      };
+
+      themeToggle.addEventListener('click', () => {
+        localStorage.setItem('theme', isDark() ? 'light' : 'dark');
+        applyTheme();
+        onScroll();
+      });
+
+      applyTheme();
+
+      const colors = { hero: '#2563EB', expertise: '#F3F4F6', contact: '#1E3A8A' };
+      const contEl = document.getElementById('downloads');
+      const logo = document.querySelector('.parallax-logo');
+
+      window.onScroll = () => {
+        const mid = window.scrollY + window.innerHeight / 2;
+        if (!isDark()) {
+          if (mid < contEl.offsetTop) document.body.style.backgroundColor = colors.hero;
+          else document.body.style.backgroundColor = colors.expertise;
+        } else {
+          document.body.style.backgroundColor = '';
+        }
+        if (logo) logo.style.transform = \`translateY(\${window.scrollY * 0.3}px)\`;
+        const docH = document.documentElement.scrollHeight - window.innerHeight;
+        document.getElementById('progressBar').style.width = ((window.scrollY / docH) * 100) + '%';
+      };
+
+      window.addEventListener('scroll', onScroll);
+      onScroll();
+
+      document.querySelectorAll('.reveal').forEach(el => {
+        new IntersectionObserver(
+          entries => entries.forEach(e => e.isIntersecting && el.classList.add('visible')),
+          { threshold: 0.2 }
+        ).observe(el);
+      });
+
+      loadRelease().catch(() => {
+        document.getElementById('releaseInfo').textContent = 'Could not load GitHub release info.';
+      });
+    });
+  </script>
+</body>
+</html>
