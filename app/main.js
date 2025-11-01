@@ -1,6 +1,7 @@
 const { app, BrowserWindow, BrowserView, session, ipcMain, Menu, shell, globalShortcut, clipboard } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const fsp = fs.promises;
 const { pathToFileURL } = require('url');
 const { v4: uuidv4 } = require('uuid');
 const { autoUpdater } = require('electron-updater');
@@ -19,6 +20,23 @@ app.commandLine.appendSwitch('no-pings');
 app.commandLine.appendSwitch('force-webrtc-ip-handling-policy','disable_non_proxied_udp');
 
 let win;
+let adblocker = null; // shared instance across sessions
+let adblockerPromise = null;
+
+async function getAdblocker() {
+  if (adblocker) return adblocker;
+  if (adblockerPromise) return adblockerPromise;
+  const cachePath = path.join(app.getPath('userData'), 'adblocker-engine.bin');
+  adblockerPromise = ElectronBlocker.fromPrebuiltAdsAndTracking(fetch, {
+    path: cachePath,
+    read: fsp.readFile,
+    write: fsp.writeFile,
+  }).then((b) => { adblocker = b; return b; }).catch(async (e) => {
+    // Fallback without cache params if file I/O fails
+    try { const b = await ElectronBlocker.fromPrebuiltAdsAndTracking(fetch); adblocker = b; return b; } catch { throw e; }
+  });
+  return adblockerPromise;
+}
 const tor = new TorManager(app);
 
 const FIRST_RUN_FILE = path.join(app.getPath('userData'), 'first-run.json');
@@ -66,13 +84,27 @@ function normalizeInput(input) {
 
 // ---- UI helpers ----
 function sendUI(ch, payload){ if (win && !win.isDestroyed()) win.webContents.send(ch, payload); }
+let __topBarHeight = 56;
 function layoutViews(){
   if (!win || !activeTabId) return;
   const view = tabs.get(activeTabId)?.view; if (!view) return;
-  const { width, height } = win.getBounds();
-  const topBar = 56;
+  // Use content bounds to avoid including OS chrome/titlebar sizes
+  const { width, height } = win.getContentBounds();
+  const topBar = __topBarHeight;
   view.setBounds({ x:0, y:topBar, width:Math.max(100,width), height:Math.max(100,height-topBar) });
   view.setAutoResize({ width:true, height:true });
+}
+
+// Measure the actual height of the top UI bar from the renderer
+function measureTopBar(){
+  if (!win) return;
+  try {
+    win.webContents.executeJavaScript(
+      '(() => { const el = document.querySelector(".bar"); return el ? Math.ceil(el.getBoundingClientRect().height) : 56; })()'
+    , true).then((h) => {
+      if (typeof h === 'number' && h > 0 && h < 500) { __topBarHeight = h; layoutViews(); }
+    }).catch(()=>{});
+  } catch {}
 }
 function getActiveWC() { const t = tabs.get(activeTabId); return t ? t.view.webContents : null; }
 function toggleDevToolsActive() { const wc = getActiveWC(); if (wc) wc.toggleDevTools(); }
@@ -147,9 +179,11 @@ async function initSessionForContainer(containerName) {
   const ses = session.fromPartition(partition);
 
   if (!ses.__adblockInitialized) {
-    const blocker = await ElectronBlocker.fromPrebuiltAdsAndTracking(fetch);
-    blocker.enableBlockingInSession(ses);
-    ses.__adblockInitialized = true;
+    try {
+      const blocker = await getAdblocker();
+      blocker.enableBlockingInSession(ses);
+      ses.__adblockInitialized = true;
+    } catch {}
   }
   if (!ses.__headersHandler) {
     ses.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -209,24 +243,75 @@ async function initSessionForContainer(containerName) {
 
 // ---- Probe ----
 async function probeContainer(containerName) {
-  const { partition, torEnabled } = ensureContainer(containerName);
+  const info = ensureContainer(containerName);
+  const { partition, torEnabled } = info;
+  // Ensure session hooks + proxy are applied before probing
+  await initSessionForContainer(containerName).catch(()=>{});
+  await applyProxyFor(containerName).catch(()=>{});
+
   return new Promise(async (resolve) => {
     const probe = new BrowserWindow({
       show: false,
-      webPreferences: { partition, contextIsolation: true, sandbox: true, nodeIntegration: false }
+      webPreferences: {
+        partition,
+        contextIsolation: true,
+        sandbox: true,
+        nodeIntegration: false,
+        backgroundThrottling: false
+      }
     });
     const result = { container: containerName, torExpected: !!torEnabled, ok: false, ip: null, isTor: null, error: null };
     const done = () => { try { probe.destroy(); } catch {} ; sendUI('container:status', result); resolve(result); };
 
+    // Helper to load a URL with a timeout
+    const loadWithTimeout = (url, ms = 12000) => new Promise((resolveLoad, rejectLoad) => {
+      let finished = false;
+      const t = setTimeout(() => { if (!finished) { finished = true; try { probe.webContents.stop(); } catch {} ; rejectLoad(new Error('timeout')); } }, ms);
+      probe.loadURL(url).then(() => { if (!finished) { finished = true; clearTimeout(t); resolveLoad(); } })
+        .catch((e) => { if (!finished) { finished = true; clearTimeout(t); rejectLoad(e); } });
+    });
+
     try {
-      await probe.loadURL('https://api.ipify.org?format=json');
-      const text = await probe.webContents.executeJavaScript('document.body.innerText', true);
-      const data = JSON.parse(text);
-      result.ip = data.ip || null;
-      await probe.loadURL('https://check.torproject.org/');
-      const html = await probe.webContents.executeJavaScript('document.documentElement.innerText', true);
-      result.isTor = /Congratulations\. This browser is configured to use Tor/i.test(html);
-      result.ok = true;
+      // Try multiple IP endpoints to avoid single-provider failures
+      const candidates = [
+        { url: 'https://api.ipify.org?format=text', parse: (s) => s.trim() },
+        { url: 'https://checkip.amazonaws.com/', parse: (s) => s.trim() },
+        { url: 'https://icanhazip.com/', parse: (s) => s.trim() },
+        { url: 'https://ifconfig.me/ip', parse: (s) => s.trim() }
+      ];
+      let ip = null; let lastErr = null;
+      for (const c of candidates) {
+        try {
+          await loadWithTimeout(c.url, 12000);
+          const text = await probe.webContents.executeJavaScript('document.body.innerText', true);
+          ip = c.parse(String(text || '')) || null;
+          if (ip) break;
+        } catch (e) { lastErr = e; }
+      }
+      result.ip = ip;
+
+      // Tor detection via API first, then fallback to page text
+      try {
+        await loadWithTimeout('https://check.torproject.org/api/ip', 15000);
+        const apiText = await probe.webContents.executeJavaScript('document.body.innerText', true);
+        try {
+          const data = JSON.parse(apiText);
+          if (typeof data.IsTor === 'boolean') {
+            result.isTor = data.IsTor;
+          }
+          if (!ip && data.IP) result.ip = data.IP;
+        } catch {}
+      } catch {}
+      if (typeof result.isTor !== 'boolean') {
+        try {
+          await loadWithTimeout('https://check.torproject.org/', 15000);
+          const html = await probe.webContents.executeJavaScript('document.documentElement.innerText', true);
+          result.isTor = /Congratulations\. This browser is configured to use Tor/i.test(html);
+        } catch {}
+      }
+
+      result.ok = !!(result.ip || typeof result.isTor === 'boolean');
+      if (!result.ok && lastErr) result.error = String(lastErr && lastErr.message || lastErr);
     } catch (e) {
       result.error = String(e && e.message || e);
     }
@@ -242,27 +327,36 @@ function broadcastTabsState() {
       id: t.id,
       container: t.container,
       title: t.view.webContents.getTitle() || 'New Tab',
-      url: t.view.webContents.getURL(),
+      url: t.view.webContents.getURL() || t.pendingURL || '',
       favicon: t.favicon || null
     })),
     containers: [...containers.entries()].map(([name, info]) => ({ name, tor: info.torEnabled }))
   });
 }
 
-async function createTab({ container='Private', startURL='https://start.duckduckgo.com/' } = {}) {
+async function createTab({ container='Private', startURL='https://start.duckduckgo.com/', activate=true, deferLoad=false } = {}) {
   const id = uuidv4();
   ensureContainer(container, container !== 'Private');
   await initSessionForContainer(container);
   await applyProxyFor(container);
 
   const view = new BrowserView({
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation:true, sandbox:true, nodeIntegration:false, partition: ensureContainer(container).partition }
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      sandbox: true,
+      nodeIntegration: false,
+      spellcheck: false,
+      partition: ensureContainer(container).partition
+    }
   });
 
-  tabs.set(id, { id, container, view, favicon: null });
-  win.addBrowserView(view);
-  activeTabId = id;
-  layoutViews();
+  tabs.set(id, { id, container, view, favicon: null, pendingURL: deferLoad ? startURL : null });
+  if (activate) {
+    win.addBrowserView(view);
+    activeTabId = id;
+    layoutViews();
+  }
 
   const wc = view.webContents;
 
@@ -283,7 +377,7 @@ async function createTab({ container='Private', startURL='https://start.duckduck
   wc.on('did-navigate', emit);
   wc.on('did-navigate-in-page', emit);
 
-  wc.loadURL(startURL);
+  if (!deferLoad) wc.loadURL(startURL);
   broadcastTabsState();
   return id;
 }
@@ -294,6 +388,10 @@ function activateTab(id){
   const t = tabs.get(id);
   win.addBrowserView(t.view);
   activeTabId = id;
+  // Load deferred URL on activation if needed
+  try {
+    if (t.pendingURL) { t.view.webContents.loadURL(t.pendingURL); t.pendingURL = null; }
+  } catch {}
   layoutViews();
   broadcastTabsState();
 }
@@ -302,6 +400,7 @@ function closeTab(id){
   const t = tabs.get(id); if (!t) return;
   win.removeBrowserView(t.view);
   try { t.view.webContents.destroy(); } catch {}
+  try { t.view.destroy(); } catch {}
   tabs.delete(id);
   if (activeTabId === id) {
     const list = [...tabs.values()];
@@ -374,12 +473,13 @@ async function restoreSession() {
       }
     }
     if (Array.isArray(state.tabs) && state.tabs.length) {
-      for (const t of state.tabs) {
-        await createTab({ container: t.container || 'Private', startURL: t.url || 'https://start.duckduckgo.com/' });
-      }
       const target = Math.min(state.activeIndex ?? 0, state.tabs.length-1);
-      const arr = [...tabs.values()];
-      if (arr[target]) activateTab(arr[target].id);
+      for (let i = 0; i < state.tabs.length; i++) {
+        const t = state.tabs[i];
+        const activate = (i === target);
+        const deferLoad = !activate; // lazy-load background tabs to reduce startup CPU/memory
+        await createTab({ container: t.container || 'Private', startURL: t.url || 'https://start.duckduckgo.com/', activate, deferLoad });
+      }
       return true;
     }
   } catch {}
@@ -391,7 +491,13 @@ function createWindow(){
   win = new BrowserWindow({
     width: 1200, height: 800, title: 'Unseen Browser',
     icon: path.join(__dirname, 'assets', 'logo.png'),
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation:true, sandbox:true, nodeIntegration:false }
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      sandbox: true,
+      nodeIntegration: false,
+      spellcheck: false
+    }
   });
   if (process.platform === 'darwin') {
     try { app.dock.setIcon(path.join(__dirname, 'assets', 'logo.png')); } catch {}
@@ -399,7 +505,15 @@ function createWindow(){
   buildMenu();
   wireUIContextMenu();
   win.loadFile('index.html');
-  win.on('resize', layoutViews);
+  // Keep BrowserView sized correctly across window state changes
+  win.on('resize', () => { measureTopBar(); layoutViews(); });
+  win.on('maximize', () => { measureTopBar(); layoutViews(); });
+  win.on('unmaximize', () => { measureTopBar(); layoutViews(); });
+  win.on('enter-full-screen', () => { measureTopBar(); layoutViews(); });
+  win.on('leave-full-screen', () => { measureTopBar(); layoutViews(); });
+  win.on('restore', () => { measureTopBar(); layoutViews(); });
+  win.on('show', () => { measureTopBar(); layoutViews(); });
+  win.webContents.on('did-finish-load', () => { measureTopBar(); layoutViews(); });
   win.on('close', () => saveSession());
   win.on('closed', async () => {
     for (const [name, info] of containers) {
