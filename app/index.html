@@ -36,40 +36,40 @@
 </head>
 <body>
   <div class="bar" style="gap:10px;">
-    <div class="tabs" id="tabs"></div>
-    <button class="btn" id="addTab">＋</button>
-    <button class="btn" id="back">←</button>
-    <button class="btn" id="forward">→</button>
-    <button class="btn" id="reload">⟳</button>
+    <div class="tabs" id="tabs" title="Tabs – click to switch, right‑click to close"></div>
+    <button class="btn" id="addTab" title="New tab (opens in selected container)">＋</button>
+    <button class="btn" id="back" title="Go back (Alt+Left/Cmd+[)">←</button>
+    <button class="btn" id="forward" title="Go forward (Alt+Right/Cmd+])">→</button>
+    <button class="btn" id="reload" title="Reload (Ctrl/Cmd+R)">⟳</button>
 
-    <select id="containerSel" class="btn">
+    <select id="containerSel" class="btn" title="Container – isolates cookies/storage by group. Private clears on exit; Work/Social persist.">
       <option>Private</option>
       <option>Work</option>
       <option>Social</option>
     </select>
 
-    <div class="torctl">
+    <div class="torctl" title="Tor routing for selected container">
       <span class="tiny">Tor</span>
-      <label class="switch">
-        <input type="checkbox" id="torToggle" />
+      <label class="switch" title="Toggle Tor for the selected container">
+        <input type="checkbox" id="torToggle" title="Route this container over Tor" />
         <span class="slider"></span>
       </label>
       <button class="icon-btn" id="startTorBtn" title="Start Tor" style="display:none">Start</button>
     </div>
 
-    <div class="status">
+    <div class="status" title="Network status – shows Direct/Tor and current IP">
       <div id="netDot" class="dot gray"></div>
       <span id="netText" class="tiny">Unknown</span>
-      <button class="btn tiny" id="probeBtn">Check</button>
+      <button class="btn tiny" id="probeBtn" title="Probe IP and Tor status for the selected container">Check</button>
     </div>
 
-    <input id="url" type="text" placeholder="Search or URL (Ctrl/Cmd+L)"/>
-    <div class="perm">
+    <input id="url" type="text" placeholder="Search or URL (Ctrl/Cmd+L)" title="Enter a URL or search query. Press Enter to go; Ctrl/Cmd+L to focus"/>
+    <div class="perm" title="Per‑site permissions for this page's host">
       <span class="tiny">Perm:</span>
-      <label class="pill tiny"><input type="checkbox" id="permMedia"/> media</label>
-      <label class="pill tiny"><input type="checkbox" id="permGeo"/> geo</label>
+      <label class="pill tiny" title="Allow camera/microphone on this site"><input type="checkbox" id="permMedia"/> media</label>
+      <label class="pill tiny" title="Allow location on this site"><input type="checkbox" id="permGeo"/> geo</label>
     </div>
-    <div id="spinner" class="spinner"></div>
+    <div id="spinner" class="spinner" title="Loading"></div>
   </div>
 
   <script>
