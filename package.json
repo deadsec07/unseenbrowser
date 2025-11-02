@@ -1,6 +1,6 @@
 {
   "name": "unseenbrowser",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "Privacy-first browser with Tor mode, container tabs, adblock, and per-site permissions",
   "author": "HNE Technologies",
   "license": "MIT",
