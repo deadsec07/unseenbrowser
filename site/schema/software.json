@@ -1,0 +1,24 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Unseen Browser",
+  "operatingSystem": "macOS, Windows, Linux",
+  "applicationCategory": "BrowserApplication",
+  "applicationSubCategory": "Privacy-focused desktop browser",
+  "softwareVersion": "0.3.0",
+  "image": "https://unseenbrowser.hnetechnologies.com/company_logo.png",
+  "url": "https://unseenbrowser.hnetechnologies.com/",
+  "downloadUrl": "https://github.com/deadsec07/unseenbrowser/releases/latest",
+  "publisher": {
+    "@type": "Organization",
+    "name": "HNE Technologies",
+    "url": "https://hnetechnologies.com"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+}
+
