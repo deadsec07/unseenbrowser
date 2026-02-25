@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# If you change the domain, update the sitemap URL below
+Sitemap: https://unseenbrowser.hnetechnologies.com/sitemap.xml
+
