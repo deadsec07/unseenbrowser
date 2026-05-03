@@ -1,32 +1,30 @@
 # Unseen Browser
 
-Privacy-first desktop browser (Electron) with **per-container Tor routing**, **ad/tracker blocking**, **per-site permissions**, and a minimal UI.
+Unseen Browser is a privacy-first desktop browser by A A Hasnat at HNE Technologies. It is built with Electron and focuses on per-container Tor routing, tracker blocking, hardened defaults, and a minimal interface.
 
-- **Tor mode per container** – flip a container between Direct ↔ Tor, with a live indicator and IP probe.
-- **Container tabs** – isolate cookies/storage by container (Private, Work, Social, + custom).
-- **uBlock-style filtering** – via `@cliqz/adblocker-electron` (prebuilt lists).
-- **Per-site permissions** – camera/mic/geo allowlists.
-- **DevTools** – open via right-click “Inspect Element” or **F12/Cmd+Shift+I**.
-- **Session restore** – tabs & containers restored on launch.
-- **Hardening** – contextIsolation, sandbox, HTTPS upgrades, strip tracking params, WebRTC non-proxied UDP disabled.
+Links:
+- Live site: https://unseenbrowser.hnetechnologies.com/
+- GitHub: https://github.com/deadsec07/unseenbrowser
+- Main site: https://hnetechnologies.com/
+- Creator profile: https://deadsec07.github.io/
 
-## Quick start (dev)
+## Features
+
+- Per-container Tor routing with live indicator and IP probe
+- Container tabs for isolated cookies and storage
+- Built-in ad and tracker blocking
+- Per-site permissions for camera, microphone, and location
+- Session restore and hardened Electron defaults
+
+## Quick start
 
 ```bash
-# macOS (example)
-brew install tor           # optional for dev; app can spawn or use PATH tor
+brew install tor
 cd unseenbrowser
 npm ci
 npm run start
+```
 
-### Bundling Tor (zero-setup)
+## Bundling Tor
 
-Place binaries here before building:
-
-vendor/
-tor/
-win/ tor.exe + required DLLs (from Tor Expert Bundle)
-mac/ tor (+x) + libevent*.dylib, libssl*.dylib, libcrypto*.dylib (from Tor Browser “Tor” folder)
-linux/ tor (+x) [optional; otherwise users need system Tor]
-
-The app will prefer bundled Tor. If none is found, it falls back to `tor` on PATH.
+Place Tor binaries under `vendor/tor/` before building for zero-setup distribution. The app prefers bundled Tor and falls back to `tor` on PATH when unavailable.
